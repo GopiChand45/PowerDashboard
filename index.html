@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Power Dashboard</h1>
+        <div class="flowchart">
+            <div class="row">
+                <div class="block" id="power-plant">Power Plant</div>
+                <div class="block" id="power-grid">Power Grid</div>
+                <div class="block" id="mseb">MSEB</div>
+            </div>
+            <div class="row">
+                <div class="block" id="jsw-kalameshwer">JSW Kalameshwer</div>
+            </div>
+        
+            <svg height="200" width="500">
+                <line id="line1" x1="50" y1="25" x2="200" y2="25" stroke="black" stroke-width="2" />
+                <line id="line2" x1="200" y1="25" x2="350" y2="25" stroke="black" stroke-width="2" />
+                <line id="line3" x1="200" y1="25" x2="200" y2="100" stroke="black" stroke-width="2" />
+            </svg>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>Mill1</th>
+                    <th>Mill2</th>
+                    <th>Gall1</th>
+                    <th>Gall2</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><input type="text" id="mill1-input" placeholder="Enter Mill1 data"></td>
+                    <td><input type="text" id="mill2-input" placeholder="Enter Mill2 data"></td>
+                    <td><input type="text" id="gall1-input" placeholder="Enter Gall1 data"></td>
+                    <td><input type="text" id="gall2-input" placeholder="Enter Gall2 data"></td>
+                </tr>
+                <tr>
+                    <td><button class="toggle-btn" data-field="mill1">Off</button></td>
+                    <td><button class="toggle-btn" data-field="mill2">Off</button></td>
+                    <td><button class="toggle-btn" data-field="gall1">Off</button></td>
+                    <td><button class="toggle-btn" data-field="gall2">Off</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div>
+            <label for="sum">Sum:</label>
+            <input type="text" id="sum" readonly>
+        </div>
+        <div>
+            <label for="scheduled-power">Scheduled Power:</label>
+            <input type="text" id="scheduled-power">
+            <button id="save-scheduled-power">Save</button>
+        </div>
+        <div>
+            <label for="actual-power">Actual Power:</label>
+            <input type="text" id="actual-power" readonly>
+        </div>
+        <div>
+            <label for="difference">Difference:</label>
+            <input type="text" id="difference" readonly>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
