@@ -1,37 +1,29 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const saveButton = document.createElement('button');
-    saveButton.textContent = 'Save';
-    saveButton.addEventListener('click', saveData);
-    document.querySelector('tbody tr').appendChild(saveButton);
-
     document.getElementById('save-scheduled-power').addEventListener('click', saveScheduledPower);
+    document.getElementById('save-data').addEventListener('click', saveData);
 
     loadData();
-
-    document.querySelectorAll('.toggle-btn').forEach(button => {
-        button.addEventListener('click', toggleField);
-    });
 
     calculateSum();
     calculateActualPower();
 });
 
 function saveData() {
-    const mill1 = document.getElementById('mill1-input').value;
-    const mill2 = document.getElementById('mill2-input').value;
-    const gall1 = document.getElementById('gall1-input').value;
-    const gall2 = document.getElementById('gall2-input').value;
-
-    localStorage.setItem('mill1', mill1);
-    localStorage.setItem('mill2', mill2);
-    localStorage.setItem('gall1', gall1);
-    localStorage.setItem('gall2', gall2);
-
     document.querySelectorAll('.toggle-btn').forEach(button => {
         const field = button.dataset.field;
         const state = button.textContent;
         localStorage.setItem(`${field}-state`, state);
     });
+
+    // Save additional fields
+    const additionalFields = [];
+    document.querySelectorAll('#data-table tbody tr').forEach(row => {
+        const field = row.cells[0].querySelector('input').value;
+        const value = row.cells[1].querySelector('input').value;
+        const state = row.cells[2].querySelector('button').textContent;
+        additionalFields.push({ field, value, state });
+    });
+    localStorage.setItem('additionalFields', JSON.stringify(additionalFields));
 
     alert('Data saved!');
     calculateSum();
@@ -39,23 +31,13 @@ function saveData() {
 }
 
 function loadData() {
-    const mill1 = localStorage.getItem('mill1') || '';
-    const mill2 = localStorage.getItem('mill2') || '';
-    const gall1 = localStorage.getItem('gall1') || '';
-    const gall2 = localStorage.getItem('gall2') || '';
     const scheduledPower = localStorage.getItem('scheduledPower') || '';
-
-    document.getElementById('mill1-input').value = mill1;
-    document.getElementById('mill2-input').value = mill2;
-    document.getElementById('gall1-input').value = gall1;
-    document.getElementById('gall2-input').value = gall2;
     document.getElementById('scheduled-power').value = scheduledPower;
 
-    document.querySelectorAll('.toggle-btn').forEach(button => {
-        const field = button.dataset.field;
-        const state = localStorage.getItem(`${field}-state`) || 'Off';
-        button.textContent = state;
-        document.getElementById(`${field}-input`).disabled = state === 'Off';
+    // Load additional fields
+    const additionalFields = JSON.parse(localStorage.getItem('additionalFields')) || [];
+    additionalFields.forEach(({ field, value, state }) => {
+        addRow(field, state, value);
     });
 
     calculateSum();
@@ -69,9 +51,13 @@ function toggleField(event) {
 
     if (button.textContent === 'Off') {
         button.textContent = 'On';
+        button.classList.remove('off-btn');
+        button.classList.add('on-btn');
         input.disabled = false;
     } else {
         button.textContent = 'Off';
+        button.classList.remove('on-btn');
+        button.classList.add('off-btn');
         input.disabled = true;
     }
 
@@ -79,12 +65,11 @@ function toggleField(event) {
 }
 
 function calculateSum() {
-    const mill1 = parseFloat(document.getElementById('mill1-input').value) || 0;
-    const mill2 = parseFloat(document.getElementById('mill2-input').value) || 0;
-    const gall1 = parseFloat(document.getElementById('gall1-input').value) || 0;
-    const gall2 = parseFloat(document.getElementById('gall2-input').value) || 0;
-
-    const sum = mill1 + mill2 + gall1 + gall2;
+    let sum = 0;
+    document.querySelectorAll('#data-table tbody tr').forEach(row => {
+        const value = parseFloat(row.cells[1].querySelector('input').value) || 0;
+        sum += value;
+    });
     document.getElementById('sum').value = sum;
 }
 
@@ -125,16 +110,88 @@ function updateFlowchart(difference) {
     const line1 = document.getElementById('line1');
     const line2 = document.getElementById('line2');
     const line3 = document.getElementById('line3');
+    const arrow = document.getElementById('arrow');
+    const arrow2 = document.getElementById('arrow2');
+    const arrow3 = document.getElementById('arrow3');
+    const arrow4 = document.getElementById('arrow4');
 
     if (difference === 0) {
         line2.setAttribute('stroke', 'green');
+        arrow.style.visibility = 'hidden';
+        arrow2.style.visibility = 'hidden';
+        arrow3.style.visibility = 'hidden';
+        arrow4.style.visibility = 'hidden';
     } else if (difference > 0) {
         line1.setAttribute('stroke', 'green');
         line2.setAttribute('stroke', 'red');
         line3.setAttribute('stroke', 'green');
+        arrow.style.visibility = 'visible';
+        arrow2.style.visibility = 'visible';
+        arrow3.style.visibility = 'hidden';
+        arrow4.style.visibility = 'hidden';
     } else {
         line1.setAttribute('stroke', 'green');
         line2.setAttribute('stroke', 'red');
         line3.setAttribute('stroke', 'green');
+        arrow.style.visibility = 'hidden';
+        arrow2.style.visibility = 'hidden';
+        arrow3.style.visibility = 'visible';
+        arrow4.style.visibility = 'visible';        
+    }
+}
+
+function addRow(field = '', state = 'Off', value = '') {
+    const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+    const newField = field || document.getElementById('new-field').value;
+
+    if (newField.trim() === '') {
+        alert('Please enter field data');
+        return;
+    }
+
+    const newRow = table.insertRow();
+
+    const fieldCell = newRow.insertCell(0);
+    const valueCell = newRow.insertCell(1);
+    const onOffCell = newRow.insertCell(2);
+    const deleteCell = newRow.insertCell(3);
+
+    const fieldInput = document.createElement('input');
+    fieldInput.type = 'text';
+    fieldInput.value = newField;
+    fieldInput.disabled = true;
+    fieldCell.appendChild(fieldInput);
+
+    const valueInput = document.createElement('input');
+    valueInput.type = 'text';
+    valueInput.value = value;
+    valueInput.id = `${newField.toLowerCase().replace(/\s+/g, '-')}-input`;
+    valueInput.disabled = state === 'Off';
+    valueCell.appendChild(valueInput);
+
+    const onOffButton = document.createElement('button');
+    onOffButton.textContent = state;
+    onOffButton.classList.add('toggle-btn');
+    onOffButton.classList.add(state === 'On' ? 'on-btn' : 'off-btn');
+    onOffButton.dataset.field = newField.toLowerCase().replace(/\s+/g, '-');
+    onOffButton.onclick = function() {
+        this.textContent = this.textContent === 'Off' ? 'On' : 'Off';
+        this.classList.toggle('on-btn');
+        this.classList.toggle('off-btn');
+        valueInput.disabled = this.textContent === 'Off';
+    };
+    onOffCell.appendChild(onOffButton);
+
+    const deleteButton = document.createElement('button');
+    deleteButton.textContent = 'Delete';
+    deleteButton.classList.add('delete-btn');
+    deleteButton.onclick = function() {
+        table.deleteRow(newRow.rowIndex - 1);
+        saveData(); // Save the updated table data to localStorage
+    };
+    deleteCell.appendChild(deleteButton);
+
+    if (!field) {
+        document.getElementById('new-field').value = ''; // Clear the input field
     }
 }
