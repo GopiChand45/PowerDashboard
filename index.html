@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Power Dashboard</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header class="navbar">
+        <img src="pngwing.com.png" alt="Logo" class="logo">
+        <span class="title">| Power Dashboard</span>
+    </header>
+    <div class="container" style="margin-top: 70px;">
+        <div class="flowchart">
+            <div class="block" id="power-plant">Power Plant</div>
+            <div class="block" id="power-grid">Power Grid</div>
+            <div class="block" id="mseb">MSEB</div>
+            <div class="block" id="jsw-kalameshwer">JSW Kalameshwer</div>
+            <svg height="300" width="500">
+                <line id="line1" x1="0" y1="45" x2="225" y2="45" stroke="green" stroke-width="4" />
+                <line id="line2" x1="225" y1="45" x2="595" y2="45" stroke="green" stroke-width="4" />
+                <line id="line3" x1="225" y1="45" x2="225" y2="225" stroke="green" stroke-width="4" />
+                <polygon id="arrow" points="0,0 10,5 0,10" fill="red" visibility="hidden" />
+                <polygon id="arrow2" points="0,0 10,5 0,10" fill="red" visibility="hidden" />
+                <polygon id="arrow3" points="10,0 0,5 10,10" fill="red" visibility="hidden" />
+                <polygon id="arrow4" points="10,0 0,5 10,10" fill="red" visibility="hidden" />
+            </svg>
+        </div>
+        <form id="add-row-form">
+            <input type="text" id="new-field" placeholder="Enter field data">
+            <button type="button" onclick="addRow()">Add</button>
+        </form>
+        <table id="data-table">
+            <thead>
+                <tr>
+                    <th>Field</th>
+                    <th>Value</th>
+                    <th>On/Off</th>
+                    <th>Delete</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Rows will be added here -->
+            </tbody>
+        </table>
+        <button id="save-data">Save Data</button>
+        <div>
+            <label for="sum">Sum:</label>
+            <input type="text" id="sum" readonly>
+        </div>
+        <div>
+            <label for="scheduled-power">Scheduled Power:</label>
+            <input type="text" id="scheduled-power">
+            <button id="save-scheduled-power">Save</button>
+        </div>
+        <div>
+            <label for="actual-power">Actual Power:</label>
+            <input type="text" id="actual-power" readonly>
+        </div>
+        <div>
+            <label for="difference">Difference:</label>
+            <input type="text" id="difference" readonly>
+        </div>
+    </div>
+    <script src="scripts.js"></script>
+</body>
+</html>
