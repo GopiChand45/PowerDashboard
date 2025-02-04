@@ -9,14 +9,29 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 const predefinedFields = ['MILL1', 'MILL2', 'MILL3', 'GAL1', 'GAL2', 'CCL1', 'CCL2', 'CCL3', 'CGL2', 'CPL', 'Others'];
+const breakdownValues = {
+    'MILL1': 2.5,
+    'MILL2': 2.5,
+    'MILL3': 1.8,
+    'GAL1': 2,
+    'GAL2': 2,
+    'CCL1': 0.2,
+    'CCL2': 0.5,
+    'CCL3': 1,
+    'CGL2': 1.5,
+    'CPL': 0.2,
+    'Others': ''
+};
 
 function saveData() {
     document.querySelectorAll('.toggle-btn').forEach(button => {
         const field = button.dataset.field;
         const state = button.textContent;
         const value = document.getElementById(`${field}-input`).value;
+        const breakdown = document.getElementById(`${field}-breakdown`).value;
         localStorage.setItem(`${field}-state`, state);
         localStorage.setItem(`${field}-value`, value);
+        localStorage.setItem(`${field}-breakdown`, breakdown);
     });
 
     alert('Data saved!');
@@ -36,7 +51,8 @@ function loadData() {
     predefinedFields.forEach(field => {
         const state = localStorage.getItem(`${field.toLowerCase().replace(/\s+/g, '-')}-state`) || 'Off';
         const value = localStorage.getItem(`${field.toLowerCase().replace(/\s+/g, '-')}-value`) || '';
-        addRow(field, state, value);
+        const breakdown = localStorage.getItem(`${field.toLowerCase().replace(/\s+/g, '-')}-breakdown`) || breakdownValues[field];
+        addRow(field, state, value, breakdown);
     });
 
     calculateSum();
@@ -66,7 +82,7 @@ function toggleField(event) {
 function calculateSum() {
     let sum = 0;
     document.querySelectorAll('#data-table tbody tr').forEach(row => {
-        const value = parseFloat(row.cells[1].querySelector('input').value) || 0;
+        const value = parseFloat(row.cells[2].querySelector('input').value) || 0;
         sum += value;
     });
     document.getElementById('sum').value = sum;
@@ -139,21 +155,29 @@ function updateFlowchart(difference) {
     }
 }
 
-function addRow(field = '', state = 'Off', value = '') {
+function addRow(field = '', state = 'Off', value = '', breakdown = '') {
     const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
 
     const newRow = table.insertRow();
 
     const fieldCell = newRow.insertCell(0);
-    const valueCell = newRow.insertCell(1);
-    const onOffCell = newRow.insertCell(2);
-    const deleteCell = newRow.insertCell(3);
+    const breakdownCell = newRow.insertCell(1);
+    const valueCell = newRow.insertCell(2);
+    const onOffCell = newRow.insertCell(3);
+    const deleteCell = newRow.insertCell(4);
 
     const fieldInput = document.createElement('input');
     fieldInput.type = 'text';
     fieldInput.value = field;
     fieldInput.disabled = true;
     fieldCell.appendChild(fieldInput);
+
+    const breakdownInput = document.createElement('input');
+    breakdownInput.type = 'text';
+    breakdownInput.value = breakdown;
+    breakdownInput.id = `${field.toLowerCase().replace(/\s+/g, '-')}-breakdown`;
+    breakdownInput.readOnly = field !== 'Others';
+    breakdownCell.appendChild(breakdownInput);
 
     const valueInput = document.createElement('input');
     valueInput.type = 'text';
