@@ -8,22 +8,16 @@ document.addEventListener('DOMContentLoaded', () => {
     calculateActualPower();
 });
 
+const predefinedFields = ['MILL1', 'MILL2', 'MILL3', 'GAL1', 'GAL2', 'CCL1', 'CCL2', 'CCL3', 'CGL2', 'CPL', 'Others'];
+
 function saveData() {
     document.querySelectorAll('.toggle-btn').forEach(button => {
         const field = button.dataset.field;
         const state = button.textContent;
+        const value = document.getElementById(`${field}-input`).value;
         localStorage.setItem(`${field}-state`, state);
+        localStorage.setItem(`${field}-value`, value);
     });
-
-    // Save additional fields
-    const additionalFields = [];
-    document.querySelectorAll('#data-table tbody tr').forEach(row => {
-        const field = row.cells[0].querySelector('input').value;
-        const value = row.cells[1].querySelector('input').value;
-        const state = row.cells[2].querySelector('button').textContent;
-        additionalFields.push({ field, value, state });
-    });
-    localStorage.setItem('additionalFields', JSON.stringify(additionalFields));
 
     alert('Data saved!');
     calculateSum();
@@ -34,9 +28,14 @@ function loadData() {
     const scheduledPower = localStorage.getItem('scheduledPower') || '';
     document.getElementById('scheduled-power').value = scheduledPower;
 
-    // Load additional fields
-    const additionalFields = JSON.parse(localStorage.getItem('additionalFields')) || [];
-    additionalFields.forEach(({ field, value, state }) => {
+    // Clear existing rows
+    const tableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
+    tableBody.innerHTML = '';
+
+    // Load predefined fields
+    predefinedFields.forEach(field => {
+        const state = localStorage.getItem(`${field.toLowerCase().replace(/\s+/g, '-')}-state`) || 'Off';
+        const value = localStorage.getItem(`${field.toLowerCase().replace(/\s+/g, '-')}-value`) || '';
         addRow(field, state, value);
     });
 
@@ -142,12 +141,6 @@ function updateFlowchart(difference) {
 
 function addRow(field = '', state = 'Off', value = '') {
     const table = document.getElementById('data-table').getElementsByTagName('tbody')[0];
-    const newField = field || document.getElementById('new-field').value;
-
-    if (newField.trim() === '') {
-        alert('Please enter field data');
-        return;
-    }
 
     const newRow = table.insertRow();
 
@@ -158,14 +151,14 @@ function addRow(field = '', state = 'Off', value = '') {
 
     const fieldInput = document.createElement('input');
     fieldInput.type = 'text';
-    fieldInput.value = newField;
+    fieldInput.value = field;
     fieldInput.disabled = true;
     fieldCell.appendChild(fieldInput);
 
     const valueInput = document.createElement('input');
     valueInput.type = 'text';
     valueInput.value = value;
-    valueInput.id = `${newField.toLowerCase().replace(/\s+/g, '-')}-input`;
+    valueInput.id = `${field.toLowerCase().replace(/\s+/g, '-')}-input`;
     valueInput.disabled = state === 'Off';
     valueCell.appendChild(valueInput);
 
@@ -173,7 +166,7 @@ function addRow(field = '', state = 'Off', value = '') {
     onOffButton.textContent = state;
     onOffButton.classList.add('toggle-btn');
     onOffButton.classList.add(state === 'On' ? 'on-btn' : 'off-btn');
-    onOffButton.dataset.field = newField.toLowerCase().replace(/\s+/g, '-');
+    onOffButton.dataset.field = field.toLowerCase().replace(/\s+/g, '-');
     onOffButton.onclick = function() {
         this.textContent = this.textContent === 'Off' ? 'On' : 'Off';
         this.classList.toggle('on-btn');
@@ -190,8 +183,4 @@ function addRow(field = '', state = 'Off', value = '') {
         saveData(); // Save the updated table data to localStorage
     };
     deleteCell.appendChild(deleteButton);
-
-    if (!field) {
-        document.getElementById('new-field').value = ''; // Clear the input field
-    }
 }
